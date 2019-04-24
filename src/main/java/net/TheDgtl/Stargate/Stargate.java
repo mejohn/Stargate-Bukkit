@@ -113,7 +113,7 @@ public class Stargate extends JavaPlugin {
 		// Set portalFile and gateFolder to the plugin folder as defaults.
 		portalFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/portals/";
 		gateFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/gates/";
-		langFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/lang/";
+		langFolder = getDataFolder().getPath().replaceAll("\\\\", "/");
 
 		log.info(pdfFile.getName() + " v." + pdfFile.getVersion() + " is enabled.");
 

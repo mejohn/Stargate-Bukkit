@@ -6,6 +6,7 @@
 package net.TheDgtl.Stargate.listeners;
 
 import net.TheDgtl.Stargate.EconomyHandler;
+import net.TheDgtl.Stargate.Stargate;
 import static net.TheDgtl.Stargate.Stargate.log;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,9 +19,11 @@ import org.bukkit.event.server.PluginEnableEvent;
  */
 public class StarGateServerListener implements Listener {
 
+    private Stargate plugin = Stargate.getInstance();
+
     @EventHandler
     public void onPluginEnable(PluginEnableEvent event) {
-        if (EconomyHandler.setupEconomy(getServer().getPluginManager())) {
+        if (EconomyHandler.setupEconomy(plugin.getServer().getPluginManager())) {
             log.info("[Stargate] Vault v" + EconomyHandler.vault.getDescription().getVersion() + " found");
         }
     }

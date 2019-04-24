@@ -6,6 +6,7 @@
 package net.TheDgtl.Stargate.listeners;
 
 import net.TheDgtl.Stargate.Portal;
+import net.TheDgtl.Stargate.Stargate;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,7 +28,7 @@ public class StarGateEntityListener implements Listener {
             if (portal == null) {
                 continue;
             }
-            if (destroyExplosion) {
+            if (Stargate.destroyExplosion) {
                 portal.unregister(true);
             } else {
                 event.setCancelled(true);

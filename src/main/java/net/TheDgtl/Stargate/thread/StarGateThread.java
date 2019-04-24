@@ -15,6 +15,8 @@ import net.TheDgtl.Stargate.Stargate;
  */
 public class StarGateThread implements Runnable {
 
+    Stargate SG = Stargate.getInstance();
+
     @Override
     public void run() {
         long time = System.currentTimeMillis() / 1000;

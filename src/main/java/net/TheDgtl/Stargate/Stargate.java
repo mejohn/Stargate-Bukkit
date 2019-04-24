@@ -8,12 +8,11 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.TheDgtl.Stargate.Stargate.SGThread;
-import net.TheDgtl.Stargate.Stargate.SGThread;
 
 import net.TheDgtl.Stargate.event.StargateAccessEvent;
 import net.TheDgtl.Stargate.listeners.StarGateListener;
 import net.TheDgtl.Stargate.thread.BlockPopulatorThread;
+import net.TheDgtl.Stargate.thread.StarGateThread;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -24,10 +23,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -62,15 +57,17 @@ public class Stargate extends JavaPlugin {
 	public static Stargate stargate;
 	private static LangLoader lang;
 
+    private static Stargate instance;
+
 	private static String portalFolder;
 	private static String gateFolder;
 	private static String langFolder;
 	private static String defNetwork = "central";
-	private static boolean destroyExplosion = false;
+	public static boolean destroyExplosion = false;
 	public static int maxGates = 0;
 	private static String langName = "en";
-	private static int activeTime = 10;
-	private static int openTime = 10;
+	public static int activeTime = 10;
+	public static int openTime = 10;
 	public static boolean destMemory = false;
 	public static boolean handleVehicles = true;
 	public static boolean sortLists = false;
@@ -110,6 +107,7 @@ public class Stargate extends JavaPlugin {
 		log = Logger.getLogger("Minecraft");
 		Stargate.server = getServer();
 		Stargate.stargate = this;
+        instance = this;
 
 		// Set portalFile and gateFolder to the plugin folder as defaults.
 		portalFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/portals/";
@@ -141,7 +139,7 @@ public class Stargate extends JavaPlugin {
 				log.info("[Stargate] Vault v" + EconomyHandler.vault.getDescription().getVersion() + " found");
         }
 
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new SGThread(), 0L, 100L);
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new StarGateThread(), 0L, 100L);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, new BlockPopulatorThread(), 0L, 1L);
 	}
 
@@ -636,4 +634,8 @@ public class Stargate extends JavaPlugin {
 		}
 		return false;
 	}
+
+    public static Stargate getInstance() {
+        return instance;
+    }
 }

@@ -596,46 +596,6 @@ public class Stargate extends JavaPlugin {
 		return format;
 	}
 
-	private class wListener implements Listener {
-		@EventHandler
-		public void onWorldLoad(WorldLoadEvent event) {
-			Portal.loadAllGates(event.getWorld());
-		}
-
-		// We need to reload all gates on world unload, boo
-		@EventHandler
-		public void onWorldUnload(WorldUnloadEvent event) {
-			Stargate.debug("onWorldUnload", "Reloading all Stargates");
-			World w = event.getWorld();
-			String location = Stargate.getSaveLocation();
-			File db = new File(location, w.getName() + ".db");
-			if (db.exists()) {
-				Portal.clearGates();
-				for (World world : server.getWorlds()) {
-					if (world.equals(w)) continue;
-					Portal.loadAllGates(world);
-				}
-			}
-		}
-	}
-
-	private class eListener implements Listener {
-		@EventHandler
-		public void onEntityExplode(EntityExplodeEvent event) {
-			if (event.isCancelled()) return;
-			for (Block b : event.blockList()) {
-				Portal portal = Portal.getByBlock(b);
-				if (portal == null) continue;
-				if (destroyExplosion) {
-					portal.unregister(true);
-				} else {
-					event.setCancelled(true);
-					break;
-				}
-			}
-		}
-	}
-
 	private class sListener implements Listener {
 		@EventHandler
 		public void onPluginEnable(PluginEnableEvent event) {

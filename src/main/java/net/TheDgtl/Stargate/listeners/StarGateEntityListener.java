@@ -8,13 +8,14 @@ package net.TheDgtl.Stargate.listeners;
 import net.TheDgtl.Stargate.Portal;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
 /**
  *
  * @author Frostalf
  */
-public class StarGateEntityListener {
+public class StarGateEntityListener implements Listener {
 
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {

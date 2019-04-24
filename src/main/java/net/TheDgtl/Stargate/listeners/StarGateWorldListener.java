@@ -11,6 +11,7 @@ import net.TheDgtl.Stargate.Stargate;
 import static net.TheDgtl.Stargate.Stargate.server;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
@@ -18,7 +19,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
  *
  * @author Frostalf
  */
-public class StarGateWorldListener {
+public class StarGateWorldListener implements Listener {
 
     @EventHandler
     public void onWorldLoad(WorldLoadEvent event) {

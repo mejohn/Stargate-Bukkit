@@ -1,58 +1,33 @@
 package net.TheDgtl.Stargate;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.TheDgtl.Stargate.Stargate.SGThread;
+import net.TheDgtl.Stargate.Stargate.SGThread;
 
 import net.TheDgtl.Stargate.event.StargateAccessEvent;
-import net.TheDgtl.Stargate.event.StargateDestroyEvent;
+import net.TheDgtl.Stargate.listeners.StarGateListener;
+import net.TheDgtl.Stargate.thread.BlockPopulatorThread;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.EndGateway;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Orientable;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.event.vehicle.VehicleMoveEvent;
-import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -144,13 +119,7 @@ public class Stargate extends JavaPlugin {
 		log.info(pdfFile.getName() + " v." + pdfFile.getVersion() + " is enabled.");
 
 		// Register events before loading gates to stop weird things happening.
-		pm.registerEvents(new pListener(), this);
-		pm.registerEvents(new bListener(), this);
-
-		pm.registerEvents(new vListener(), this);
-		pm.registerEvents(new eListener(), this);
-		pm.registerEvents(new wListener(), this);
-		pm.registerEvents(new sListener(), this);
+        StarGateListener SGL = new StarGateListener(this);
 
 		this.loadConfig();
 
@@ -594,48 +563,6 @@ public class Stargate extends JavaPlugin {
 			format = format.replace(search[i], replace[i]);
 		}
 		return format;
-	}
-
-	private class sListener implements Listener {
-		@EventHandler
-		public void onPluginEnable(PluginEnableEvent event) {
-			if (EconomyHandler.setupEconomy(getServer().getPluginManager())) {
-				log.info("[Stargate] Vault v" + EconomyHandler.vault.getDescription().getVersion() + " found");
-			}
-		}
-
-		@EventHandler
-		public void onPluginDisable(PluginDisableEvent event) {
-			if (event.getPlugin().equals(EconomyHandler.vault)) {
-				log.info("[Stargate] Vault plugin lost.");
-			}
-		}
-	}
-
-	private class SGThread implements Runnable {
-		public void run() {
-			long time = System.currentTimeMillis() / 1000;
-			// Close open portals
-			for (Iterator<Portal> iter = Stargate.openList.iterator(); iter.hasNext();) {
-				Portal p = iter.next();
-				// Skip always open gates
-				if (p.isAlwaysOn()) continue;
-				if (!p.isOpen()) continue;
-				if (time > p.getOpenTime() + Stargate.openTime) {
-					p.close(false);
-					iter.remove();
-				}
-			}
-			// Deactivate active portals
-			for (Iterator<Portal> iter = Stargate.activeList.iterator(); iter.hasNext();) {
-				Portal p = iter.next();
-				if (!p.isActive()) continue;
-				if (time > p.getOpenTime() + Stargate.activeTime) {
-					p.deactivate();
-					iter.remove();
-				}
-			}
-		}
 	}
 
 	@Override

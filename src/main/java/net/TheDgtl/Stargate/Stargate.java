@@ -612,29 +612,6 @@ public class Stargate extends JavaPlugin {
 		}
 	}
 
-	private class BlockPopulatorThread implements Runnable {
-		public void run() {
-			long sTime = System.nanoTime();
-			while (System.nanoTime() - sTime < 25000000) {
-				BloxPopulator b = Stargate.blockPopulatorQueue.poll();
-				if (b == null) return;
-				Block blk = b.getBlox().getBlock();
-				blk.setType(b.getMat(), false);
-				if(b.getMat() == Material.END_GATEWAY && blk.getWorld().getEnvironment() == World.Environment.THE_END) {
-					// force a location to prevent exit gateway generation
-					EndGateway gateway = (EndGateway) blk.getState();
-					gateway.setExitLocation(blk.getWorld().getSpawnLocation());
-					gateway.setExactTeleport(true);
-					gateway.update(false, false);
-				} else if(b.getAxis() != null) {
-					Orientable orientable = (Orientable) blk.getBlockData();
-					orientable.setAxis(b.getAxis());
-					blk.setBlockData(orientable);
-				}
-			}
-		}
-	}
-
 	private class SGThread implements Runnable {
 		public void run() {
 			long time = System.currentTimeMillis() / 1000;

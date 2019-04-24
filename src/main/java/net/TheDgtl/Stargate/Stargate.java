@@ -63,12 +63,12 @@ import org.bukkit.plugin.java.JavaPlugin;
  * Copyright (C) 2011 Shaun (sturmeh)
  * Copyright (C) 2011 Dinnerbone
  * Copyright (C) 2011, 2012 Steven "Drakia" Scott <Contact@TheDgtl.net>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -86,7 +86,7 @@ public class Stargate extends JavaPlugin {
 	public static Server server;
 	public static Stargate stargate;
 	private static LangLoader lang;
-	
+
 	private static String portalFolder;
 	private static String gateFolder;
 	private static String langFolder;
@@ -103,29 +103,31 @@ public class Stargate extends JavaPlugin {
 	public static boolean enableBungee = true;
 	public static boolean verifyPortals = true;
 	public static ChatColor signColor;
-	
+
 	// Temp workaround for snowmen, don't check gate entrance
 	public static boolean ignoreEntrance = false;
-	
+
 	// Used for debug
 	public static boolean debug = false;
 	public static boolean permDebug = false;
-	
+
 	public static ConcurrentLinkedQueue<Portal> openList = new ConcurrentLinkedQueue<>();
 	public static ConcurrentLinkedQueue<Portal> activeList = new ConcurrentLinkedQueue<>();
-	
+
 	// Used for populating gate open/closed material.
 	public static Queue<BloxPopulator> blockPopulatorQueue = new LinkedList<>();
-	
+
 	// HashMap of player names for Bungee support
 	public static Map<String, String> bungeeQueue = new HashMap<>();
-	
+
+    @Override
 	public void onDisable() {
 		Portal.closeAllGates();
 		Portal.clearGates();
 		getServer().getScheduler().cancelTasks(this);
 	}
 
+    @Override
 	public void onEnable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
 		pm = getServer().getPluginManager();
@@ -133,43 +135,43 @@ public class Stargate extends JavaPlugin {
 		log = Logger.getLogger("Minecraft");
 		Stargate.server = getServer();
 		Stargate.stargate = this;
-		
+
 		// Set portalFile and gateFolder to the plugin folder as defaults.
 		portalFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/portals/";
 		gateFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/gates/";
 		langFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/lang/";
-		
+
 		log.info(pdfFile.getName() + " v." + pdfFile.getVersion() + " is enabled.");
-		
+
 		// Register events before loading gates to stop weird things happening.
 		pm.registerEvents(new pListener(), this);
 		pm.registerEvents(new bListener(), this);
-		
+
 		pm.registerEvents(new vListener(), this);
 		pm.registerEvents(new eListener(), this);
 		pm.registerEvents(new wListener(), this);
 		pm.registerEvents(new sListener(), this);
-		
+
 		this.loadConfig();
-		
+
 		// Enable the required channels for Bungee support
 		if (enableBungee) {
 			Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 			Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new pmListener());
 		}
-		
+
 		// It is important to load languages here, as they are used during reloadGates()
 		lang = new LangLoader(langFolder, Stargate.langName);
-		
+
 		this.migrate();
 		this.reloadGates();
-		
+
 		// Check to see if Economy is loaded yet.
 		if (EconomyHandler.setupEconomy(pm)) {
 			if (EconomyHandler.economy != null)
 				log.info("[Stargate] Vault v" + EconomyHandler.vault.getDescription().getVersion() + " found");
         }
-		
+
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, new SGThread(), 0L, 100L);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, new BlockPopulatorThread(), 0L, 1L);
 	}
@@ -179,7 +181,7 @@ public class Stargate extends JavaPlugin {
 		newConfig = this.getConfig();
 		// Copy default values if required
 		newConfig.options().copyDefaults(true);
-		
+
 		// Load values into variables
 		portalFolder = newConfig.getString("portal-folder");
 		gateFolder = newConfig.getString("gate-folder");
@@ -213,23 +215,23 @@ public class Stargate extends JavaPlugin {
 		EconomyHandler.toOwner = newConfig.getBoolean("toowner");
 		EconomyHandler.chargeFreeDestination = newConfig.getBoolean("chargefreedestination");
 		EconomyHandler.freeGatesGreen = newConfig.getBoolean("freegatesgreen");
-		
+
 		this.saveConfig();
 	}
-	
+
 	public void reloadGates() {
 		// Close all gates prior to reloading
 		for (Portal p : openList) {
 			p.close(true);
 		}
-		
+
 		Gate.loadGates(gateFolder);
 		log.info("[Stargate] Loaded " + Gate.getGateCount() + " gate layouts");
 		for (World world : getServer().getWorlds()) {
 			Portal.loadAllGates(world);
 		}
 	}
-	
+
 	private void migrate() {
 		// Only migrate if new file doesn't exist.
 		File newPortalDir = new File(portalFolder);
@@ -241,7 +243,7 @@ public class Stargate extends JavaPlugin {
 			newFile.getParentFile().mkdirs();
 		}
 	}
-	
+
 	public static void debug(String rout, String msg) {
 		if (Stargate.debug) {
 			log.info("[Stargate::" + rout + "] " + msg);
@@ -249,11 +251,11 @@ public class Stargate extends JavaPlugin {
 			log.log(Level.FINEST, "[Stargate::" + rout + "] " + msg);
 		}
 	}
-	
+
 	public static void sendMessage(CommandSender player, String message) {
 		sendMessage(player, message, true);
 	}
-	
+
 	public static void sendMessage(CommandSender player, String message, boolean error) {
 		if (message.isEmpty()) return;
 		message = message.replaceAll("(&([a-f0-9]))", "\u00A7$2");
@@ -262,7 +264,7 @@ public class Stargate extends JavaPlugin {
 		else
 			player.sendMessage(ChatColor.GREEN + Stargate.getString("prefix") + ChatColor.WHITE + message);
 	}
-	
+
 	public static void setLine(Sign sign, int index, String text) {
 		sign.setLine(index, Stargate.signColor + text);
 	}
@@ -270,7 +272,7 @@ public class Stargate extends JavaPlugin {
 	public static String getSaveLocation() {
 		return portalFolder;
 	}
-	
+
 	public static String getGateFolder() {
 		return gateFolder;
 	}
@@ -278,29 +280,29 @@ public class Stargate extends JavaPlugin {
 	public static String getDefaultNetwork() {
 		return defNetwork;
 	}
-	
+
 	public static String getString(String name) {
 		return lang.getString(name);
 	}
 
 	public static void openPortal(Player player, Portal portal) {
 		Portal destination = portal.getDestination();
-		
+
 		// Always-open gate -- Do nothing
 		if (portal.isAlwaysOn()) {
 			return;
 		}
-		
+
 		// Random gate -- Do nothing
 		if (portal.isRandom())
 			return;
-		
+
 		// Invalid destination
 		if ((destination == null) || (destination == portal)) {
 			Stargate.sendMessage(player, Stargate.getString("invalidMsg"));
 			return;
 		}
-		
+
 		// Gate is already open
 		if (portal.isOpen()) {
 			// Close if this player opened the gate
@@ -309,25 +311,25 @@ public class Stargate extends JavaPlugin {
 			}
 			return;
 		}
-		
+
 		// Gate that someone else is using -- Deny access
 		if ((!portal.isFixed()) && portal.isActive() &&  (portal.getActivePlayer() != player)) {
 			Stargate.sendMessage(player, Stargate.getString("denyMsg"));
 			return;
 		}
-		
+
 		// Check if the player can use the private gate
 		if (portal.isPrivate() && !Stargate.canPrivate(player, portal)) {
 			Stargate.sendMessage(player, Stargate.getString("denyMsg"));
 			return;
 		}
-		
+
 		// Destination blocked
 		if ((destination.isOpen()) && (!destination.isAlwaysOn())) {
 			Stargate.sendMessage(player, Stargate.getString("blockMsg"));
 			return;
 		}
-		
+
 		// Open gate
 		portal.open(player, false);
 	}
@@ -340,7 +342,7 @@ public class Stargate extends JavaPlugin {
 			Stargate.debug("hasPerm::SuperPerm(" + player.getName() + ")", perm + " => " + player.hasPermission(perm));
 		return player.hasPermission(perm);
 	}
-	
+
 	/*
 	 * Check a deep permission, this will check to see if the permissions is defined for this use
 	 * If using Permissions it will return the same as hasPerm
@@ -357,7 +359,7 @@ public class Stargate extends JavaPlugin {
 			Stargate.debug("hasPermDeep::SuperPerms", perm + " => " + player.hasPermission(perm));
 		return player.hasPermission(perm);
 	}
-	
+
 	/*
 	 * Check whether player can teleport to dest world
 	 */
@@ -370,7 +372,7 @@ public class Stargate extends JavaPlugin {
 		// Can access dest world
 		return hasPerm(player, "stargate.world." + world);
 	}
-	
+
 	/*
 	 * Check whether player can use network
 	 */
@@ -387,7 +389,7 @@ public class Stargate extends JavaPlugin {
 		if (playerName.length() > 11) playerName = playerName.substring(0, 11);
 		return network.equals(playerName) && hasPerm(player, "stargate.create.personal");
 	}
-	
+
 	/*
 	 * Check whether the player can access this server
 	 */
@@ -400,7 +402,7 @@ public class Stargate extends JavaPlugin {
 		// Can access this server
 		return hasPerm(player, "stargate.server." + server);
 	}
-	
+
 	/*
 	 * Call the StargateAccessPortal event, used for other plugins to bypass Permissions checks
 	 */
@@ -409,7 +411,7 @@ public class Stargate extends JavaPlugin {
 		Stargate.server.getPluginManager().callEvent(event);
 		return !event.getDeny();
 	}
-	
+
 	/*
 	 * Return true if the portal is free for the player
 	 */
@@ -421,7 +423,7 @@ public class Stargate extends JavaPlugin {
 		// Don't charge for free destination gates
 		return dest != null && !EconomyHandler.chargeFreeDestination && dest.isFree();
 	}
-	
+
 	/*
 	 * Check whether the player can see this gate (Hidden property check)
 	 */
@@ -433,7 +435,7 @@ public class Stargate extends JavaPlugin {
 		// The player is the owner of the gate
 		return portal.getOwner().equalsIgnoreCase(player.getName());
 	}
-	
+
 	/*
 	 * Check if the player can use this private gate
 	 */
@@ -443,7 +445,7 @@ public class Stargate extends JavaPlugin {
 		// The player is an admin with the ability to use private gates
 		return hasPerm(player, "stargate.admin") || hasPerm(player, "stargate.admin.private");
 	}
-	
+
 	/*
 	 * Check if the player has access to {option}
 	 */
@@ -453,7 +455,7 @@ public class Stargate extends JavaPlugin {
 		// Check if they can use this specific option
 		return hasPerm(player, "stargate.option." + option);
 	}
-	
+
 	/*
 	 * Check if the player can create gates on {network}
 	 */
@@ -469,7 +471,7 @@ public class Stargate extends JavaPlugin {
 		return hasPerm(player, "stargate.create.network." + network);
 
 	}
-	
+
 	/*
 	 * Check if the player can create a personal gate
 	 */
@@ -479,7 +481,7 @@ public class Stargate extends JavaPlugin {
 		// Check for personal
 		return hasPerm(player, "stargate.create.personal");
 	}
-	
+
 	/*
 	 * Check if the player can create this gate layout
 	 */
@@ -494,7 +496,7 @@ public class Stargate extends JavaPlugin {
 		// Check for this specific gate
 		return hasPerm(player, "stargate.create.gate." + gate);
 	}
-	
+
 	/*
 	 * Check if the player can destroy this gate
 	 */
@@ -512,7 +514,7 @@ public class Stargate extends JavaPlugin {
 		// Check for personal gate
 		return player.getName().equalsIgnoreCase(portal.getOwner()) && hasPerm(player, "stargate.destroy.personal");
 	}
-	
+
 	/*
 	 * Charge player for {action} if required, true on success, false if can't afford
 	 */
@@ -524,7 +526,7 @@ public class Stargate extends JavaPlugin {
 		// Charge player
 		return EconomyHandler.chargePlayer(player.getName(), target, cost);
 	}
-	
+
 	/*
 	 * Determine the cost of a gate
 	 */
@@ -539,10 +541,10 @@ public class Stargate extends JavaPlugin {
 		if (src.getGate().getToOwner() && src.getOwner().equalsIgnoreCase(player.getName())) return 0;
 		// Player gets free gate use
 		if (hasPerm(player, "stargate.free") || hasPerm(player, "stargate.free.use")) return 0;
-		
+
 		return src.getGate().getUseCost();
 	}
-	
+
 	/*
 	 * Determine the cost to create the gate
 	 */
@@ -551,10 +553,10 @@ public class Stargate extends JavaPlugin {
 		if (!EconomyHandler.useEconomy()) return 0;
 		// Player gets free gate destruction
 		if (hasPerm(player, "stargate.free") || hasPerm(player, "stargate.free.create")) return 0;
-		
+
 		return gate.getCreateCost();
 	}
-	
+
 	/*
 	 * Determine the cost to destroy the gate
 	 */
@@ -563,10 +565,10 @@ public class Stargate extends JavaPlugin {
 		if (!EconomyHandler.useEconomy()) return 0;
 		// Player gets free gate destruction
 		if (hasPerm(player, "stargate.free") || hasPerm(player, "stargate.free.destroy")) return 0;
-		
+
 		return gate.getDestroyCost();
 	}
-	
+
 	/*
 	 * Check if a plugin is loaded/enabled already. Returns the plugin if so, null otherwise
 	 */
@@ -574,7 +576,7 @@ public class Stargate extends JavaPlugin {
 		Plugin plugin = pm.getPlugin(p);
 		return checkPlugin(plugin);
 	}
-	
+
 	private Plugin checkPlugin(Plugin plugin) {
 		if (plugin != null && plugin.isEnabled()) {
 			log.info("[Stargate] Found " + plugin.getDescription().getName() + " (v" + plugin.getDescription().getVersion() + ")");
@@ -582,7 +584,7 @@ public class Stargate extends JavaPlugin {
 		}
 		return null;
 	}
-	
+
 	/*
 	 * Parse a given text string and replace the variables
 	 */
@@ -593,27 +595,27 @@ public class Stargate extends JavaPlugin {
 		}
 		return format;
 	}
-	
+
 	private class vListener implements Listener {
 		@EventHandler
 		public void onVehicleMove(VehicleMoveEvent event) {
 			if (!handleVehicles) return;
 			Entity passenger = event.getVehicle().getPassenger();
 			Vehicle vehicle = event.getVehicle();
-			
+
 			Portal portal = Portal.getByEntrance(event.getTo());
 			if (portal == null || !portal.isOpen()) return;
-			
+
 			// We don't support vehicles in Bungee portals
 			if (portal.isBungee()) return;
-			
+
 			if (passenger instanceof Player) {
 				Player player = (Player)passenger;
 				if (!portal.isOpenFor(player)) {
 					Stargate.sendMessage(player, Stargate.getString("denyMsg"));
 					return;
 				}
-				
+
 				Portal dest = portal.getDestination(player);
 				if (dest == null) return;
 				boolean deny = false;
@@ -621,18 +623,18 @@ public class Stargate extends JavaPlugin {
 				if (!canAccessNetwork(player, portal.getNetwork())) {
 					deny = true;
 				}
-				
+
 				// Check if player has access to destination world
 				if (!canAccessWorld(player, dest.getWorld().getName())) {
 					deny = true;
 				}
-				
+
 				if (!canAccessPortal(player, portal, deny)) {
 					Stargate.sendMessage(player, Stargate.getString("denyMsg"));
 					portal.close(false);
 					return;
 				}
-				
+
 				int cost = Stargate.getUseCost(player, portal, dest);
 				if (cost > 0) {
 					String target = portal.getGate().getToOwner() ? portal.getOwner() : null;
@@ -654,7 +656,7 @@ public class Stargate extends JavaPlugin {
 						}
 					}
 				}
-				
+
 				Stargate.sendMessage(player, Stargate.getString("teleportMsg"), false);
 				dest.teleport(vehicle);
 				portal.close(false);
@@ -662,250 +664,6 @@ public class Stargate extends JavaPlugin {
 				Portal dest = portal.getDestination();
 				if (dest == null) return;
 				dest.teleport(vehicle);
-			}
-		}
-	}
-	
-	private class pListener implements Listener {
-		@EventHandler
-		public void onPlayerJoin(PlayerJoinEvent event) {
-			if (!enableBungee) return;
-			
-			Player player = event.getPlayer();
-			String destination = bungeeQueue.remove(player.getName().toLowerCase());
-			if (destination == null) return;
-			
-			Portal portal = Portal.getBungeeGate(destination);
-			if (portal == null) {
-				Stargate.debug("PlayerJoin", "Error fetching destination portal: " + destination);
-				return;
-			}
-			portal.teleport(player, portal, null);
-		}
-
-		@EventHandler
-		public void onPlayerTeleport(PlayerTeleportEvent event) {
-			// cancel portal and endgateway teleportation if it's from a Stargate entrance
-			PlayerTeleportEvent.TeleportCause cause = event.getCause();
-			if(!event.isCancelled()
-			&& (cause == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL
-			|| cause == PlayerTeleportEvent.TeleportCause.END_GATEWAY && World.Environment.THE_END == event.getFrom().getWorld().getEnvironment())
-			&& Portal.getByAdjacentEntrance(event.getFrom()) != null) {
-				event.setCancelled(true);
-			}
-		}
-		
-		@EventHandler
-		public void onPlayerMove(PlayerMoveEvent event) {
-			if (event.isCancelled()) return;
-			
-			// Check to see if the player actually moved
-			if (event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockY() == event.getTo().getBlockY() && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
-				return;
-			}
-			
-			Player player = event.getPlayer();
-			Portal portal = Portal.getByEntrance(event.getTo());
-			// No portal or not open
-			if (portal == null || !portal.isOpen()) return;
-
-			// Not open for this player
-			if (!portal.isOpenFor(player)) {
-				Stargate.sendMessage(player, Stargate.getString("denyMsg"));
-				portal.teleport(player, portal, event);
-				return;
-			}
-			
-			Portal destination = portal.getDestination(player);
-			if (!portal.isBungee() && destination == null) return;
-			
-			boolean deny = false;
-			// Check if player has access to this server for Bungee gates
-			if (portal.isBungee()) {
-				if (!canAccessServer(player, portal.getNetwork())) {
-					deny = true;
-				}
-			} else {
-				// Check if player has access to this network
-				if (!canAccessNetwork(player, portal.getNetwork())) {
-					deny = true;
-				}
-				
-				// Check if player has access to destination world
-				if (!canAccessWorld(player, destination.getWorld().getName())) {
-					deny = true;
-				}
-			}
-			
-			if (!canAccessPortal(player, portal, deny)) {
-				Stargate.sendMessage(player, Stargate.getString("denyMsg"));
-				portal.teleport(player, portal, event);
-				portal.close(false);
-				return;
-			}
-			
-			int cost = Stargate.getUseCost(player, portal, destination);
-			if (cost > 0) {
-				String target = portal.getGate().getToOwner() ? portal.getOwner() : null;
-				if (!Stargate.chargePlayer(player, target, cost)) {
-					// Insufficient Funds
-					Stargate.sendMessage(player, "Insufficient Funds");
-					portal.close(false);
-					return;
-				}
-				String deductMsg = Stargate.getString("ecoDeduct");
-				deductMsg = Stargate.replaceVars(deductMsg, new String[] {"%cost%", "%portal%"}, new String[] {EconomyHandler.format(cost), portal.getName()});
-				sendMessage(player, deductMsg, false);
-				if (target != null) {
-					Player p = server.getPlayer(target);
-					if (p != null) {
-						String obtainedMsg = Stargate.getString("ecoObtain");
-						obtainedMsg = Stargate.replaceVars(obtainedMsg, new String[] {"%cost%", "%portal%"}, new String[] {EconomyHandler.format(cost), portal.getName()});
-						Stargate.sendMessage(p, obtainedMsg, false);
-					}
-				}
-			}
-			
-			Stargate.sendMessage(player, Stargate.getString("teleportMsg"), false);
-			
-			// BungeeCord Support
-			if (portal.isBungee()) {
-				if (!enableBungee) {
-					player.sendMessage(Stargate.getString("bungeeDisabled"));
-					portal.close(false);
-					return;
-				}
-				
-				// Teleport the player back to this gate, for sanity's sake
-				portal.teleport(player, portal, event);
-				
-				// Send the SGBungee packet first, it will be queued by BC if required
-				try {
-					// Build the message, format is <player>#@#<destination>
-					String msg = event.getPlayer().getName() + "#@#" + portal.getDestinationName();
-					// Build the message data, sent over the SGBungee bungeecord channel
-					ByteArrayOutputStream bao = new ByteArrayOutputStream();
-					DataOutputStream msgData = new DataOutputStream(bao);
-					msgData.writeUTF("Forward");
-					msgData.writeUTF(portal.getNetwork());	// Server
-					msgData.writeUTF("SGBungee");			// Channel
-					msgData.writeShort(msg.length()); 	// Data Length
-					msgData.writeBytes(msg); 			// Data
-					player.sendPluginMessage(stargate, "BungeeCord", bao.toByteArray());
-				} catch (IOException ex) {
-					Stargate.log.severe("[Stargate] Error sending BungeeCord teleport packet");
-					ex.printStackTrace();
-					return;
-				}
-				
-				// Connect player to new server
-				try {
-					ByteArrayOutputStream bao = new ByteArrayOutputStream();
-					DataOutputStream msgData = new DataOutputStream(bao);
-					msgData.writeUTF("Connect");
-					msgData.writeUTF(portal.getNetwork());
-					
-					player.sendPluginMessage(stargate, "BungeeCord", bao.toByteArray());
-					bao.reset();
-				} catch(IOException ex) {
-					Stargate.log.severe("[Stargate] Error sending BungeeCord connect packet");
-					ex.printStackTrace();
-					return;
-				}
-				
-				// Close portal if required (Should never be)
-				portal.close(false);
-				return;
-			}
-			
-			destination.teleport(player, portal, event);
-			portal.close(false);
-		}
-		
-		@EventHandler
-		public void onPlayerInteract(PlayerInteractEvent event) {
-			Player player = event.getPlayer();
-			Block block = event.getClickedBlock();
-
-			// Right click
-			if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				if (block.getType() == Material.WALL_SIGN) {
-					Portal portal = Portal.getByBlock(block);
-					if (portal == null) return;
-					// Cancel item use
-					event.setUseItemInHand(Result.DENY);
-					event.setUseInteractedBlock(Result.DENY);
-					
-					boolean deny = false;
-					if (!Stargate.canAccessNetwork(player, portal.getNetwork())) {
-						deny = true;
-					}
-					
-					if (!Stargate.canAccessPortal(player, portal, deny)) {
-						Stargate.sendMessage(player, Stargate.getString("denyMsg"));
-						return;
-					}
-					
-					if ((!portal.isOpen()) && (!portal.isFixed())) {
-						portal.cycleDestination(player);
-					}
-					return;
-				}
-
-				// Implement right-click to toggle a stargate, gets around spawn protection problem.
-				if ((block.getType() == Material.STONE_BUTTON)) {
-					Portal portal = Portal.getByBlock(block);
-					if (portal == null) return;
-					
-					// Cancel item use
-					event.setUseItemInHand(Result.DENY);
-					event.setUseInteractedBlock(Result.DENY);
-					
-					boolean deny = false;
-					if (!Stargate.canAccessNetwork(player, portal.getNetwork())) {
-						deny = true;
-					}
-					
-					if (!Stargate.canAccessPortal(player, portal, deny)) {
-						Stargate.sendMessage(player, Stargate.getString("denyMsg"));
-						return;
-					}
-					
-					openPortal(player, portal);
-					if (portal.isOpenFor(player)) {
-						event.setUseInteractedBlock(Result.ALLOW);
-					}
-				}
-				return;
-			}
-			
-			// Left click
-			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-				// Check if we're scrolling a sign
-				if (block.getType() == Material.WALL_SIGN) {
-					Portal portal = Portal.getByBlock(block);
-					if (portal == null) return;
-					
-					event.setUseInteractedBlock(Result.DENY);
-					// Only cancel event in creative mode
-					if (player.getGameMode().equals(GameMode.CREATIVE)) {
-						event.setCancelled(true);
-					}
-					
-					boolean deny = false;
-					if (!Stargate.canAccessNetwork(player, portal.getNetwork())) {
-						deny = true;
-					}
-					
-					if (!Stargate.canAccessPortal(player, portal, deny)) {
-						Stargate.sendMessage(player, Stargate.getString("denyMsg"));
-						return;
-					}
-					
-					if ((!portal.isOpen()) && (!portal.isFixed())) {
-						portal.cycleDestination(player, -1);
-					}
-				}
 			}
 		}
 	}
@@ -917,7 +675,7 @@ public class Stargate extends JavaPlugin {
 			Player player = event.getPlayer();
 			Block block = event.getBlock();
 			if (block.getType() != Material.WALL_SIGN) return;
-			
+
 			final Portal portal = Portal.createPortal(event, player);
 			// Not creating a gate, just placing a sign
 			if (portal == null)	return;
@@ -930,7 +688,7 @@ public class Stargate extends JavaPlugin {
 				}
 			}, 1);
 		}
-		
+
 		// Switch to HIGHEST priority so as to come after block protection plugins (Hopefully)
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onBlockBreak(BlockBreakEvent event) {
@@ -942,18 +700,18 @@ public class Stargate extends JavaPlugin {
 			if (portal == null && protectEntrance)
 				portal = Portal.getByEntrance(block);
 			if (portal == null) return;
-			
+
 			boolean deny = false;
 			String denyMsg = "";
-			
+
 			if (!Stargate.canDestroy(player, portal)) {
 				denyMsg = "Permission Denied"; // TODO: Change to Stargate.getString()
 				deny = true;
 				Stargate.log.info("[Stargate] " + player.getName() + " tried to destroy gate");
 			}
-			
+
 			int cost = Stargate.getDestroyCost(player,  portal.getGate());
-			
+
 			StargateDestroyEvent dEvent = new StargateDestroyEvent(portal, player, deny, denyMsg, cost);
 			Stargate.server.getPluginManager().callEvent(dEvent);
 			if (dEvent.isCancelled()) {
@@ -965,9 +723,9 @@ public class Stargate extends JavaPlugin {
 				event.setCancelled(true);
 				return;
 			}
-			
+
 			cost = dEvent.getCost();
-			
+
 			if (cost != 0) {
 				if (!Stargate.chargePlayer(player, null, cost)) {
 					Stargate.debug("onBlockBreak", "Insufficient Funds");
@@ -975,7 +733,7 @@ public class Stargate extends JavaPlugin {
 					event.setCancelled(true);
 					return;
 				}
-				
+
 				if (cost > 0) {
 					String deductMsg = Stargate.getString("ecoDeduct");
 					deductMsg = Stargate.replaceVars(deductMsg, new String[] {"%cost%", "%portal%"}, new String[] {EconomyHandler.format(cost), portal.getName()});
@@ -986,7 +744,7 @@ public class Stargate extends JavaPlugin {
 					sendMessage(player, refundMsg, false);
 				}
 			}
-			
+
 			portal.unregister(true);
 			Stargate.sendMessage(player, Stargate.getString("destroyMsg"), false);
 		}
@@ -995,7 +753,7 @@ public class Stargate extends JavaPlugin {
 		public void onBlockPhysics(BlockPhysicsEvent event) {
 			Block block = event.getBlock();
 			Portal portal = null;
-			
+
 			// Handle keeping portal material and buttons around
 			if (block.getType() == Material.NETHER_PORTAL) {
 				portal = Portal.getByEntrance(block);
@@ -1004,7 +762,7 @@ public class Stargate extends JavaPlugin {
 			}
 			if (portal != null) event.setCancelled(true);
 		}
-		
+
 		@EventHandler
 		public void onBlockFromTo(BlockFromToEvent event) {
 			Portal portal = Portal.getByEntrance(event.getBlock());
@@ -1013,7 +771,7 @@ public class Stargate extends JavaPlugin {
 				event.setCancelled((event.getBlock().getY() == event.getToBlock().getY()));
 			}
 		}
-		
+
 		@EventHandler
 		public void onPistonExtend(BlockPistonExtendEvent event) {
 			for(Block block : event.getBlocks()) {
@@ -1024,7 +782,7 @@ public class Stargate extends JavaPlugin {
 				}
 			}
 		}
-		
+
 		@EventHandler
 		public void onPistonRetract(BlockPistonRetractEvent event) {
 			if (!event.isSticky()) return;
@@ -1037,13 +795,13 @@ public class Stargate extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	private class wListener implements Listener {
 		@EventHandler
 		public void onWorldLoad(WorldLoadEvent event) {
 			Portal.loadAllGates(event.getWorld());
 		}
-		
+
 		// We need to reload all gates on world unload, boo
 		@EventHandler
 		public void onWorldUnload(WorldUnloadEvent event) {
@@ -1060,7 +818,7 @@ public class Stargate extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	private class eListener implements Listener {
 		@EventHandler
 		public void onEntityExplode(EntityExplodeEvent event) {
@@ -1077,7 +835,7 @@ public class Stargate extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	private class sListener implements Listener {
 		@EventHandler
 		public void onPluginEnable(PluginEnableEvent event) {
@@ -1085,7 +843,7 @@ public class Stargate extends JavaPlugin {
 				log.info("[Stargate] Vault v" + EconomyHandler.vault.getDescription().getVersion() + " found");
 			}
 		}
-		
+
 		@EventHandler
 		public void onPluginDisable(PluginDisableEvent event) {
 			if (event.getPlugin().equals(EconomyHandler.vault)) {
@@ -1093,7 +851,7 @@ public class Stargate extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	private class BlockPopulatorThread implements Runnable {
 		public void run() {
 			long sTime = System.nanoTime();
@@ -1116,7 +874,7 @@ public class Stargate extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	private class SGThread implements Runnable {
 		public void run() {
 			long time = System.currentTimeMillis() / 1000;
@@ -1142,7 +900,7 @@ public class Stargate extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		String cmd = command.getName();
@@ -1175,7 +933,7 @@ public class Stargate extends JavaPlugin {
 				openList.clear();
 				Portal.clearGates();
 				Gate.clearGates();
-				
+
 				// Store the old Bungee enabled value
 				boolean oldEnableBungee = enableBungee;
 				// Reload data
@@ -1183,7 +941,7 @@ public class Stargate extends JavaPlugin {
 				reloadGates();
 				lang.setLang(langName);
 				lang.reload();
-				
+
 				// Load Economy support if enabled/clear if disabled
 				if (EconomyHandler.economyEnabled && EconomyHandler.economy == null) {
 					if (EconomyHandler.setupEconomy(pm)) {
@@ -1195,7 +953,7 @@ public class Stargate extends JavaPlugin {
 					EconomyHandler.vault = null;
 					EconomyHandler.economy = null;
 				}
-				
+
 				// Enable the required channels for Bungee support
 				if (oldEnableBungee != enableBungee) {
 					if (enableBungee) {
@@ -1206,7 +964,7 @@ public class Stargate extends JavaPlugin {
 						Bukkit.getMessenger().unregisterOutgoingPluginChannel(this, "BungeeCord");
 					}
 				}
-				
+
 				sendMessage(sender, "Stargate reloaded");
 				return true;
 			}

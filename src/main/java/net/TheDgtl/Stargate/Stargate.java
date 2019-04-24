@@ -18,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -233,6 +234,8 @@ public class Stargate extends JavaPlugin {
 	}
 
 	public static void setLine(Sign sign, int index, String text) {
+        BlockState signState = sign.getBlock().getState();
+        sign = (Sign)signState;
 		sign.setLine(index, Stargate.signColor + text);
 	}
 

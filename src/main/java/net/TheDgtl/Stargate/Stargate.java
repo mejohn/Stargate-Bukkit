@@ -111,9 +111,10 @@ public class Stargate extends JavaPlugin {
         instance = this;
 
 		// Set portalFile and gateFolder to the plugin folder as defaults.
-		portalFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/portals/";
-		gateFolder = getDataFolder().getPath().replaceAll("\\\\", "/") + "/gates/";
-		langFolder = getDataFolder().getPath().replaceAll("\\\\", "/");
+		portalFolder = getDataFolder().getPath() + "/portals/";
+		gateFolder = getDataFolder().getPath() + "/gates/";
+		langFolder = this.getDataFolder().getPath();
+        //langFolder = getDataFolder().getPath().replaceAll("\\\\", "/");
 
 		log.info(pdfFile.getName() + " v." + pdfFile.getVersion() + " is enabled.");
 
@@ -234,8 +235,6 @@ public class Stargate extends JavaPlugin {
 	}
 
 	public static void setLine(Sign sign, int index, String text) {
-        BlockState signState = sign.getBlock().getState();
-        sign = (Sign)signState;
 		sign.setLine(index, Stargate.signColor + text);
 	}
 

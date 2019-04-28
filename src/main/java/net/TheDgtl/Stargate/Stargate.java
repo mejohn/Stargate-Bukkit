@@ -62,11 +62,11 @@ public class Stargate extends JavaPlugin {
 
 	private static String portalFolder;
 	private static String gateFolder;
-	private static String langFolder;
+	//private static String langFolder;
 	private static String defNetwork = "central";
 	public static boolean destroyExplosion = false;
 	public static int maxGates = 0;
-	private static String langName = "en";
+	//private static String langName = "en";
 	public static int activeTime = 10;
 	public static int openTime = 10;
 	public static boolean destMemory = false;
@@ -113,7 +113,7 @@ public class Stargate extends JavaPlugin {
 		// Set portalFile and gateFolder to the plugin folder as defaults.
 		portalFolder = getDataFolder().getPath() + "/portals/";
 		gateFolder = getDataFolder().getPath() + "/gates/";
-		langFolder = this.getDataFolder().getPath();
+		//langFolder = this.getDataFolder().getPath();
         //langFolder = getDataFolder().getPath().replaceAll("\\\\", "/");
 
 		log.info(pdfFile.getName() + " v." + pdfFile.getVersion() + " is enabled.");
@@ -130,7 +130,7 @@ public class Stargate extends JavaPlugin {
 		}
 
 		// It is important to load languages here, as they are used during reloadGates()
-		lang = new LangLoader(langFolder, Stargate.langName);
+		//lang = new LangLoader(langFolder, Stargate.langName);
 
 		this.migrate();
 		this.reloadGates();
@@ -157,7 +157,7 @@ public class Stargate extends JavaPlugin {
 		defNetwork = newConfig.getString("default-gate-network").trim();
 		destroyExplosion = newConfig.getBoolean("destroyexplosion");
 		maxGates = newConfig.getInt("maxgates");
-		langName = newConfig.getString("lang");
+		//langName = newConfig.getString("lang");
 		destMemory = newConfig.getBoolean("destMemory");
 		ignoreEntrance = newConfig.getBoolean("ignoreEntrance");
 		handleVehicles = newConfig.getBoolean("handleVehicles");
@@ -603,8 +603,8 @@ public class Stargate extends JavaPlugin {
 				// Reload data
 				loadConfig();
 				reloadGates();
-				lang.setLang(langName);
-				lang.reload();
+				//lang.setLang(langName);
+				//lang.reload();
 
 				// Load Economy support if enabled/clear if disabled
 				if (EconomyHandler.economyEnabled && EconomyHandler.economy == null) {

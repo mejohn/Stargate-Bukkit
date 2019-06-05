@@ -119,11 +119,11 @@ public class Blox {
 		int offsetY = 0;
 		int offsetZ = 0;
 		
-		if (getBlock().getType() == Material.WALL_SIGN) {
+		if (getBlock() instanceof WallSign) {
 			BlockFace facing = ((WallSign) getBlock().getBlockData()).getFacing().getOppositeFace();
 			offsetX = facing.getModX();
 			offsetZ = facing.getModZ();
-		} else if (getBlock().getType() == Material.SIGN) {
+		} else if (getBlock() instanceof Sign) {
 			offsetY = -1;
 		} else {
 			return;

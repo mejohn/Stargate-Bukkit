@@ -27,6 +27,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Powerable;
@@ -698,8 +699,8 @@ public class Portal {
 	}
 
 	public final void drawSign() {
-		Material sMat = id.getBlock().getType();
-		if (sMat != Material.SIGN && sMat != Material.WALL_SIGN) {
+		Block sMat = id.getBlock();
+		if (!(sMat instanceof Sign)  && !(sMat instanceof WallSign)) {
 			Stargate.log.warning("[Stargate] Sign block is not a Sign object");
 			Stargate.debug("Portal::drawSign", "Block: " + id.getBlock().getType() + " @ " + id.getBlock().getLocation());
 			return;
@@ -835,7 +836,7 @@ public class Portal {
 			}
 		}
 
-		if (id.getBlock().getType() == Material.WALL_SIGN && id.getBlock().getState() instanceof Sign) {
+		if (id.getBlock() instanceof WallSign && id.getBlock().getState() instanceof Sign) {
 			Sign sign = (Sign)id.getBlock().getState();
 			sign.setLine(0, getName());
 			sign.setLine(1, "");

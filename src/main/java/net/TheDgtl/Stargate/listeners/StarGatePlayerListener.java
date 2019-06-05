@@ -25,6 +25,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -213,7 +214,7 @@ public class StarGatePlayerListener implements Listener {
 
         // Right click
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (block.getType() == Material.WALL_SIGN) {
+            if (block instanceof WallSign) {
                 Portal portal = Portal.getByBlock(block);
                 if (portal == null) {
                     return;
@@ -270,7 +271,7 @@ public class StarGatePlayerListener implements Listener {
         // Left click
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
             // Check if we're scrolling a sign
-            if (block.getType() == Material.WALL_SIGN) {
+            if (block instanceof WallSign) {
                 Portal portal = Portal.getByBlock(block);
                 if (portal == null) {
                     return;

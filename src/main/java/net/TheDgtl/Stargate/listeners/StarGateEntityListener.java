@@ -7,6 +7,8 @@ package net.TheDgtl.Stargate.listeners;
 
 import net.TheDgtl.Stargate.Portal;
 import net.TheDgtl.Stargate.Stargate;
+
+
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

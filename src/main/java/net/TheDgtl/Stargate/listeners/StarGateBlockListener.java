@@ -5,11 +5,9 @@
  */
 package net.TheDgtl.Stargate.listeners;
 
-import net.TheDgtl.Stargate.EconomyHandler;
 import net.TheDgtl.Stargate.Portal;
 import net.TheDgtl.Stargate.Stargate;
 import static net.TheDgtl.Stargate.Stargate.protectEntrance;
-import static net.TheDgtl.Stargate.Stargate.sendMessage;
 import static net.TheDgtl.Stargate.Stargate.stargate;
 import net.TheDgtl.Stargate.event.StargateDestroyEvent;
 import org.bukkit.Material;
@@ -39,13 +37,16 @@ public class StarGateBlockListener implements Listener {
         }
         Player player = event.getPlayer();
         Block block = event.getBlock();
-        if (!(block instanceof WallSign)) {
+        if (!(block.getBlockData() instanceof WallSign)) {
+        	Stargate.sendMessage(player, "SGBlockListener: Block is not Sign " + block.getBlockData().getAsString());
             return;
         }
 
         final Portal portal = Portal.createPortal(event, player);
         // Not creating a gate, just placing a sign
+        
         if (portal == null) {
+        	Stargate.sendMessage(player, "SGBlockListener: Portal is null");
             return;
         }
 
@@ -84,7 +85,7 @@ public class StarGateBlockListener implements Listener {
             Stargate.log.info("[Stargate] " + player.getName() + " tried to destroy gate");
         }
 
-        int cost = Stargate.getDestroyCost(player, portal.getGate());
+        int cost = 0;
 
         StargateDestroyEvent dEvent = new StargateDestroyEvent(portal, player, deny, denyMsg, cost);
         Stargate.server.getPluginManager().callEvent(dEvent);
@@ -100,7 +101,7 @@ public class StarGateBlockListener implements Listener {
 
         cost = dEvent.getCost();
 
-        if (cost != 0) {
+        /*if (cost != 0) {
             if (!Stargate.chargePlayer(player, null, cost)) {
                 Stargate.debug("onBlockBreak", "Insufficient Funds");
                 Stargate.sendMessage(player, Stargate.getString("inFunds"));
@@ -117,7 +118,7 @@ public class StarGateBlockListener implements Listener {
                 refundMsg = Stargate.replaceVars(refundMsg, new String[]{"%cost%", "%portal%"}, new String[]{EconomyHandler.format(-cost), portal.getName()});
                 sendMessage(player, refundMsg, false);
             }
-        }
+        }*/
 
         portal.unregister(true);
         Stargate.sendMessage(player, Stargate.getString("destroyMsg"), false);

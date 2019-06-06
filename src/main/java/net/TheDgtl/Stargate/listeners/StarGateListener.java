@@ -22,6 +22,5 @@ public class StarGateListener {
         pm.registerEvents(new StarGateEntityListener(), plugin);
         pm.registerEvents(new StarGateWorldListener(), plugin);
         pm.registerEvents(new StarGateVehicleListener(), plugin);
-        pm.registerEvents(new StarGateServerListener(), plugin);
     }
 }

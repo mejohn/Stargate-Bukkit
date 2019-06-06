@@ -20,7 +20,6 @@ import net.TheDgtl.Stargate.event.StargateOpenEvent;
 import net.TheDgtl.Stargate.event.StargatePortalEvent;
 
 import org.bukkit.Axis;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -37,7 +36,6 @@ import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.material.Step;
 import org.bukkit.util.Vector;
 
 /**
@@ -68,9 +66,6 @@ public class Portal {
 	private static final ArrayList<Portal> allPortals = new ArrayList<>();
 	private static final HashMap<String, ArrayList<String>> allPortalsNet = new HashMap<>();
 	private static final HashMap<String, HashMap<String, Portal>> lookupNamesNet = new HashMap<>();
-
-	// A list of Bungee gates
-	private static final HashMap<String, Portal> bungeePortals = new HashMap<>();
 
 	// Gate location block info
 	private Blox topLeft;
@@ -118,16 +113,17 @@ public class Portal {
 			float rotX, Blox id, Blox button,
 			String dest, String name,
 			boolean verified, String network, Gate gate, String owner,
-			boolean hidden, boolean alwaysOn, boolean priv, boolean free, boolean backwards, boolean show, boolean noNetwork, boolean random, boolean bungee) {
+			boolean hidden, boolean alwaysOn, boolean priv, boolean free, boolean backwards, boolean show, boolean noNetwork, boolean random) {
 		this.topLeft = topLeft;
 		this.modX = modX;
 		this.modZ = modZ;
 		this.rotX = rotX;
 		this.rot = rotX == 90.0F || rotX == 270.0F ? Axis.X : Axis.Z;
+		Stargate.debug("axisRotate", "" + rotX);
 		this.id = id;
 		this.destination = dest;
 		this.button = button;
-		this.verified = verified;
+		this.verified = true;
 		this.network = network;
 		this.name = name;
 		this.gate = gate;
@@ -140,10 +136,9 @@ public class Portal {
 		this.show = show;
 		this.noNetwork = noNetwork;
 		this.random = random;
-		this.bungee = bungee;
 		this.world = topLeft.getWorld();
 		this.fixed = dest.length() > 0 || this.random || this.bungee;
-
+		
 		if (this.isAlwaysOn() && !this.isFixed()) {
 			this.alwaysOn = false;
 			Stargate.debug("Portal", "Can not create a non-fixed always-on gate. Setting AlwaysOn = false");
@@ -157,6 +152,7 @@ public class Portal {
 		if (verified) {
 			this.drawSign();
 		}
+		Stargate.debug("Portal", "Created gate");
 	}
 
 	/**
@@ -378,6 +374,7 @@ public class Portal {
 
 		Material openType = gate.getPortalBlockOpen();
 		Axis ax = openType == Material.NETHER_PORTAL ? rot : null;
+		Stargate.debug("axisRotate", ax.toString() + " " + rot.toString());
 		for (Blox inside : getEntrances()) {
 			Stargate.blockPopulatorQueue.add(new BloxPopulator(inside, openType, ax));
 		}
@@ -547,9 +544,9 @@ public class Portal {
 		}
 
 		if (loc != null) {
-			if (getWorld().getBlockAt(loc).getState().getData() instanceof Step) {
+			/*if (getWorld().getBlockAt(loc).getState().getData() instanceof Step) {
 				loc.setY(loc.getY() + 0.5);
-			}
+			}*/
 
 			loc.setPitch(traveller.getPitch());
 			return loc;
@@ -700,7 +697,7 @@ public class Portal {
 
 	public final void drawSign() {
 		Block sMat = id.getBlock();
-		if (!(sMat instanceof Sign)  && !(sMat instanceof WallSign)) {
+		if (!(sMat.getBlockData() instanceof Sign)  && !(sMat.getBlockData() instanceof WallSign)) {
 			Stargate.log.warning("[Stargate] Sign block is not a Sign object");
 			Stargate.debug("Portal::drawSign", "Block: " + id.getBlock().getType() + " @ " + id.getBlock().getLocation());
 			return;
@@ -742,49 +739,49 @@ public class Portal {
 			} else {
 				int index = destinations.indexOf(destination);
 				if ((index == max) && (max > 1) && (++done <= 3)) {
-					if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
+					/*if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
 						Portal dest = Portal.getByName(destinations.get(index - 2), network);
 						boolean green = Stargate.isFree(activePlayer, this, dest);
 						Stargate.setLine(sign, done, (green ? ChatColor.DARK_GREEN : "") + destinations.get(index - 2));
-					} else {
+					} else {*/
 						Stargate.setLine(sign, done, destinations.get(index - 2));
-					}
+					//}
 				}
 				if ((index > 0) && (++done <= 3)) {
-					if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
+					/*if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
 						Portal dest = Portal.getByName(destinations.get(index - 1), network);
 						boolean green = Stargate.isFree(activePlayer, this, dest);
 						Stargate.setLine(sign, done, (green ? ChatColor.DARK_GREEN : "") + destinations.get(index - 1));
-					} else {
+					} else {*/
 						Stargate.setLine(sign, done, destinations.get(index - 1));
-					}
+					//}
 				}
 				if (++done <= 3) {
-					if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
+					/*if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
 						Portal dest = Portal.getByName(destination, network);
 						boolean green = Stargate.isFree(activePlayer, this, dest);
 						Stargate.setLine(sign, done, (green ? ChatColor.DARK_GREEN : "") + ">" + destination + "<");
-					} else {
+					} else {*/
 						Stargate.setLine(sign, done, " >" + destination + "< ");
-					}
+					//}
 				}
 				if ((max >= index + 1) && (++done <= 3)) {
-					if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
+					/*if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
 						Portal dest = Portal.getByName(destinations.get(index + 1), network);
 						boolean green = Stargate.isFree(activePlayer, this, dest);
 						Stargate.setLine(sign, done, (green ? ChatColor.DARK_GREEN : "") + destinations.get(index + 1));
-					} else {
+					} else {*/
 						Stargate.setLine(sign, done, destinations.get(index + 1));
-					}
+					//}
 				}
 				if ((max >= index + 2) && (++done <= 3)) {
-					if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
+					/*if (EconomyHandler.useEconomy() && EconomyHandler.freeGatesGreen) {
 						Portal dest = Portal.getByName(destinations.get(index + 2), network);
 						boolean green = Stargate.isFree(activePlayer, this, dest);
 						Stargate.setLine(sign, done, (green ? ChatColor.DARK_GREEN : "") + destinations.get(index + 2));
-					} else {
+					} else {*/
 						Stargate.setLine(sign, done, destinations.get(index + 2));
-					}
+					//}
 				}
 			}
 		}
@@ -820,20 +817,16 @@ public class Portal {
 		if (removeAll)
 			allPortals.remove(this);
 
-		if (bungee) {
-			bungeePortals.remove(getName().toLowerCase());
-		} else {
-			lookupNamesNet.get(getNetwork().toLowerCase()).remove(getName().toLowerCase());
-			allPortalsNet.get(getNetwork().toLowerCase()).remove(getName().toLowerCase());
+		lookupNamesNet.get(getNetwork().toLowerCase()).remove(getName().toLowerCase());
+		allPortalsNet.get(getNetwork().toLowerCase()).remove(getName().toLowerCase());
 
-			for (String originName : allPortalsNet.get(getNetwork().toLowerCase())) {
+		for (String originName : allPortalsNet.get(getNetwork().toLowerCase())) {
 				Portal origin = Portal.getByName(originName, getNetwork());
 				if (origin == null) continue;
 				if (!origin.getDestinationName().equalsIgnoreCase(getName())) continue;
 				if (!origin.isVerified()) continue;
 				if (origin.isFixed()) origin.drawSign();
 				if (origin.isAlwaysOn()) origin.close(true);
-			}
 		}
 
 		if (id.getBlock() instanceof WallSign && id.getBlock().getState() instanceof Sign) {
@@ -855,12 +848,9 @@ public class Portal {
 	private void register() {
 		fixed = destination.length() > 0 || random || bungee;
 
-		// Bungee gates are stored in their own list
-		if (isBungee()) {
-			bungeePortals.put(getName().toLowerCase(), this);
-		} else {
-			// Check if network exists in our network list
-			if (!lookupNamesNet.containsKey(getNetwork().toLowerCase())) {
+
+		// Check if network exists in our network list
+		if (!lookupNamesNet.containsKey(getNetwork().toLowerCase())) {
 				Stargate.debug("register", "Network " + getNetwork() + " not in lookupNamesNet, adding");
 				lookupNamesNet.put(getNetwork().toLowerCase(), new HashMap<>());
 			}
@@ -871,8 +861,7 @@ public class Portal {
 				Stargate.debug("register", "Network " + getNetwork() + " not in allPortalsNet, adding");
 				allPortalsNet.put(getNetwork().toLowerCase(), new ArrayList<>());
 			}
-			allPortalsNet.get(getNetwork().toLowerCase()).add(getName().toLowerCase());
-		}
+		allPortalsNet.get(getNetwork().toLowerCase()).add(getName().toLowerCase());
 
 		for (Blox block : getFrame()) {
 			lookupBlocks.put(block, this);
@@ -898,12 +887,17 @@ public class Portal {
 		Blox id = new Blox(event.getBlock());
 		Block idParent = id.getParent();
 		if (idParent == null) {
+			Stargate.sendMessage(player,  "Portal: idParent is null " + event.getBlock().toString());
 			return null;
 		}
 
-		if (Gate.getGatesByControlBlock(idParent).length == 0) return null;
+		if (Gate.getGatesByControlBlock(idParent).length == 0) {
+			Stargate.sendMessage(player,  "Portal: getGatesByControlBlock is null");
+			return null;
+		}
 
 		if (Portal.getByBlock(idParent) != null) {
+			Stargate.sendMessage(player,  "Portal: idParent belongs to an existing gate");
 			Stargate.debug("createPortal", "idParent belongs to existing gate");
 			return null;
 		}
@@ -948,12 +942,6 @@ public class Portal {
 		if (random) {
 			alwaysOn = true;
 			show = false;
-		}
-
-		// Bungee gates are always on and don't support Random
-		if (bungee) {
-			alwaysOn = true;
-			random = false;
 		}
 
 		// Moved the layout check so as to avoid invalid messages when not making a gate
@@ -1011,23 +999,9 @@ public class Portal {
 		}
 
 		if ((gate == null) || (buttonVector == null)) {
+			Stargate.sendMessage(player,  "Portal: gate layout doesn't match");
 			Stargate.debug("createPortal", "Could not find matching gate layout");
 			return null;
-		}
-
-		// If the player is trying to create a Bungee gate without permissions, drop out here
-		// Do this after the gate layout check, in the least
-		if (bungee) {
-			if (!Stargate.enableBungee) {
-				Stargate.sendMessage(player, Stargate.getString("bungeeDisabled"));
-				return null;
-			} else if (!Stargate.hasPerm(player, "stargate.admin.bungee")) {
-				Stargate.sendMessage(player, Stargate.getString("bungeeDeny"));
-				return null;
-			} else if (destName.isEmpty() || network.isEmpty()) {
-				Stargate.sendMessage(player, Stargate.getString("bungeeEmpty"));
-				return null;
-			}
 		}
 
 		// Debug
@@ -1049,6 +1023,7 @@ public class Portal {
 				Stargate.debug("createPortal", "Creating personal portal");
 				Stargate.sendMessage(player, Stargate.getString("createPersonal"));
 			} else {
+				Stargate.sendMessage(player,  "Portal: Player doesn't have access to network");
 				Stargate.debug("createPortal", "Player does not have access to network");
 				deny = true;
 				denyMsg = Stargate.getString("createNetDeny");
@@ -1060,6 +1035,7 @@ public class Portal {
 		String gateName = gate.getFilename();
 		gateName = gateName.substring(0, gateName.indexOf('.'));
 		if (!deny && !Stargate.canCreateGate(player, gateName)) {
+			Stargate.sendMessage(player,  "Portal: player doesn't have access to gate layout");
 			Stargate.debug("createPortal", "Player does not have access to gate layout");
 			deny = true;
 			denyMsg = Stargate.getString("createGateDeny");
@@ -1071,6 +1047,7 @@ public class Portal {
 			if (p != null) {
 				String world = p.getWorld().getName();
 				if (!Stargate.canAccessWorld(player, world)) {
+					Stargate.sendMessage(player,  "Portal: player doesn't have access to destination world");
 					Stargate.debug("canCreate", "Player does not have access to destination world");
 					deny = true;
 					denyMsg = Stargate.getString("createWorldDeny");
@@ -1082,6 +1059,7 @@ public class Portal {
 		for (RelativeBlockVector v : gate.getBorder()) {
 			Blox b = topleft.modRelative(v.getRight(), v.getDepth(), v.getDistance(), modX, 1, modZ);
 			if (Portal.getByBlock(b.getBlock()) != null) {
+				Stargate.sendMessage(player,  "Portal: Gate conflicts with existing gate");
 				Stargate.debug("createPortal", "Gate conflicts with existing gate");
 				Stargate.sendMessage(player, Stargate.getString("createConflict"));
 				return null;
@@ -1090,9 +1068,9 @@ public class Portal {
 
 		Blox button = null;
 		Portal portal = null;
-		portal = new Portal(topleft, modX, modZ, rotX, id, button, destName, name, false, network, gate, player.getName(), hidden, alwaysOn, priv, free, backwards, show, noNetwork, random, bungee);
+		portal = new Portal(topleft, modX, modZ, rotX, id, button, destName, name, false, network, gate, player.getName(), hidden, alwaysOn, priv, free, backwards, show, noNetwork, random);
 
-		int cost = Stargate.getCreateCost(player, gate);
+		int cost = 0;
 
 		// Call StargateCreateEvent
 		StargateCreateEvent cEvent = new StargateCreateEvent(player, portal, event.getLines(), deny, denyMsg, cost);
@@ -1101,6 +1079,7 @@ public class Portal {
 			return null;
 		}
 		if (cEvent.getDeny()) {
+			Stargate.sendMessage(player,  "Portal: " + cEvent.getDenyReason());
 			Stargate.sendMessage(player, cEvent.getDenyReason());
 			return null;
 		}
@@ -1109,20 +1088,14 @@ public class Portal {
 
 		// Name & Network can be changed in the event, so do these checks here.
 		if (portal.getName().length() < 1 || portal.getName().length() > 11) {
+			Stargate.sendMessage(player,  "Portal: name error length");
 			Stargate.debug("createPortal", "Name length error");
 			Stargate.sendMessage(player, Stargate.getString("createNameLength"));
 			return null;
 		}
 
-		// Don't do network checks for bungee gates
-		if (portal.isBungee()) {
-			if (bungeePortals.get(portal.getName().toLowerCase()) != null) {
-				Stargate.debug("createPortal::Bungee", "Gate Exists");
-				Stargate.sendMessage(player, Stargate.getString("createExists"));
-				return null;
-			}
-		} else {
-			if (getByName(portal.getName(), portal.getNetwork()) != null) {
+		if (getByName(portal.getName(), portal.getNetwork()) != null) {
+				Stargate.sendMessage(player,  "Portal: name error");
 				Stargate.debug("createPortal", "Name Error");
 				Stargate.sendMessage(player,  Stargate.getString("createExists"));
 				return null;
@@ -1133,21 +1106,8 @@ public class Portal {
 			if (Stargate.maxGates > 0 && netList != null && netList.size() >= Stargate.maxGates) {
 				Stargate.sendMessage(player, Stargate.getString("createFull"));
 				return null;
-			}
 		}
 
-		if (cost > 0) {
-			if (!Stargate.chargePlayer(player, null, cost)) {
-				String inFundMsg = Stargate.getString("ecoInFunds");
-				inFundMsg = Stargate.replaceVars(inFundMsg, new String[] {"%cost%", "%portal%"}, new String[] {EconomyHandler.format(cost), name});
-				Stargate.sendMessage(player, inFundMsg);
-				Stargate.debug("createPortal", "Insufficient Funds");
-				return null;
-			}
-			String deductMsg = Stargate.getString("ecoDeduct");
-			deductMsg = Stargate.replaceVars(deductMsg, new String[] {"%cost%", "%portal%"}, new String[] {EconomyHandler.format(cost), name});
-			Stargate.sendMessage(player, deductMsg, false);
-		}
 
 		// No button on an always-open gate.
 		if (!alwaysOn) {
@@ -1243,10 +1203,6 @@ public class Portal {
 
 	public static Portal getByBlock(Block block) {
 		return lookupBlocks.get(new Blox(block));
-	}
-
-	public static Portal getBungeeGate(String name) {
-		return bungeePortals.get(name.toLowerCase());
 	}
 
 	public static void saveAllGates(World world) {
@@ -1373,9 +1329,8 @@ public class Portal {
 					boolean show = (split.length > 17) && split[17].equalsIgnoreCase("true");
 					boolean noNetwork = (split.length > 18) && split[18].equalsIgnoreCase("true");
 					boolean random = (split.length > 19) && split[19].equalsIgnoreCase("true");
-					boolean bungee = (split.length > 20) && split[20].equalsIgnoreCase("true");
 
-					Portal portal = new Portal(topLeft, modX, modZ, rotX, sign, button, dest, name, false, network, gate, owner, hidden, alwaysOn, priv, free, backwards, show, noNetwork, random, bungee);
+					Portal portal = new Portal(topLeft, modX, modZ, rotX, sign, button, dest, name, false, network, gate, owner, hidden, alwaysOn, priv, free, backwards, show, noNetwork, random);
 					portal.register();
 					portal.close(true);
 				}

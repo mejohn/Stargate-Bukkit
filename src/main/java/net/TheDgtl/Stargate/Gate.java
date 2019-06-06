@@ -54,12 +54,6 @@ public class Gate {
 	private Material portalBlockOpen = Material.NETHER_PORTAL;
 	private Material portalBlockClosed = Material.AIR;
 	
-	// Economy information
-	private int useCost = -1;
-	private int createCost = -1;
-	private int destroyCost = -1;
-	private boolean toOwner = false;
-
 	public Gate(String filename, Character[][] layout, HashMap<Character, Material> types) {
 		this.filename = filename;
 		this.layout = layout;
@@ -120,13 +114,6 @@ public class Gate {
 			
 			writeConfig(bw, "portal-open", portalBlockOpen.name());
 			writeConfig(bw, "portal-closed", portalBlockClosed.name());
-			if (useCost != -1)
-				writeConfig(bw, "usecost", useCost);
-			if (createCost != -1)
-				writeConfig(bw, "createcost", createCost);
-			if (destroyCost != -1)
-				writeConfig(bw, "destroycost", destroyCost);
-			writeConfig(bw, "toowner", toOwner);
 
 			for (Map.Entry<Character, Material> entry : types.entrySet()) {
 				Character type = entry.getKey();
@@ -157,16 +144,6 @@ public class Gate {
 		} catch (IOException ex) {
 			Stargate.log.log(Level.SEVERE, "Could not save Gate " + filename + " - " + ex.getMessage());
 		}
-	}
-
-	private void writeConfig(BufferedWriter bw, String key, int value) throws IOException {
-		bw.append(String.format("%s=%d", key, value));
-		bw.newLine();
-	}
-	
-	private void writeConfig(BufferedWriter bw, String key, boolean value) throws IOException {
-		bw.append(String.format("%s=%b", key, value));
-		bw.newLine();
 	}
 
 	private void writeConfig(BufferedWriter bw, String key, String value) throws IOException {
@@ -223,25 +200,6 @@ public class Gate {
 	
 	public void setPortalBlockClosed(Material type) {
 		portalBlockClosed = type;
-	}
-	
-	public int getUseCost() {
-		if (useCost < 0) return EconomyHandler.useCost;
-		return useCost;
-	}
-	
-	public Integer getCreateCost() {
-		if (createCost < 0) return EconomyHandler.createCost;
-		return createCost;
-	}
-	
-	public Integer getDestroyCost() {
-		if (destroyCost < 0) return EconomyHandler.destroyCost;
-		return destroyCost;
-	}
-	
-	public Boolean getToOwner() {
-		return toOwner;
 	}
 	
 	public boolean matches(Blox topleft, int modX, int modZ) {
@@ -376,10 +334,6 @@ public class Gate {
 
 		gate.portalBlockOpen = readConfig(config, gate, file, "portal-open", gate.portalBlockOpen);
 		gate.portalBlockClosed = readConfig(config, gate, file, "portal-closed", gate.portalBlockClosed);
-		gate.useCost = readConfig(config, gate, file, "usecost", -1);
-		gate.destroyCost = readConfig(config, gate, file, "destroycost", -1);
-		gate.createCost = readConfig(config, gate, file, "createcost", -1);
-		gate.toOwner = (config.containsKey("toowner") ? Boolean.valueOf(config.get("toowner")) : EconomyHandler.toOwner);
 
 		if (gate.getControls().length != 2) {
 			Stargate.log.log(Level.SEVERE, "Could not load Gate " + file.getName() + " - Gates must have exactly 2 control points.");
@@ -391,18 +345,6 @@ public class Gate {
 		
 		gate.save(file.getParent() + "/"); // Updates format for version changes
 		return gate;
-	}
-
-	private static int readConfig(HashMap<String, String> config, Gate gate, File file, String key, int def) {
-		if (config.containsKey(key)) {
-			try {
-				return Integer.parseInt(config.get(key));
-			} catch (NumberFormatException ex) {
-				Stargate.log.log(Level.WARNING, String.format("%s reading %s: %s is not numeric", ex.getClass().getName(), file, key));
-			}
-		}
-
-		return def;
 	}
 
 	private static Material readConfig(HashMap<String, String> config, Gate gate, File file, String key, Material def) {

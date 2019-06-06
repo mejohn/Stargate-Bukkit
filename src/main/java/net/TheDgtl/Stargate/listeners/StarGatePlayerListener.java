@@ -5,22 +5,13 @@
  */
 package net.TheDgtl.Stargate.listeners;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import net.TheDgtl.Stargate.EconomyHandler;
 import net.TheDgtl.Stargate.Portal;
 import net.TheDgtl.Stargate.Stargate;
-import static net.TheDgtl.Stargate.Stargate.bungeeQueue;
 import static net.TheDgtl.Stargate.Stargate.canAccessNetwork;
 import static net.TheDgtl.Stargate.Stargate.canAccessPortal;
 import static net.TheDgtl.Stargate.Stargate.canAccessServer;
 import static net.TheDgtl.Stargate.Stargate.canAccessWorld;
-import static net.TheDgtl.Stargate.Stargate.enableBungee;
 import static net.TheDgtl.Stargate.Stargate.openPortal;
-import static net.TheDgtl.Stargate.Stargate.sendMessage;
-import static net.TheDgtl.Stargate.Stargate.server;
-import static net.TheDgtl.Stargate.Stargate.stargate;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -32,7 +23,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
@@ -41,26 +31,6 @@ import org.bukkit.event.player.PlayerTeleportEvent;
  * @author Frostalf
  */
 public class StarGatePlayerListener implements Listener {
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!enableBungee) {
-            return;
-        }
-
-        Player player = event.getPlayer();
-        String destination = bungeeQueue.remove(player.getName().toLowerCase());
-        if (destination == null) {
-            return;
-        }
-
-        Portal portal = Portal.getBungeeGate(destination);
-        if (portal == null) {
-            Stargate.debug("PlayerJoin", "Error fetching destination portal: " + destination);
-            return;
-        }
-        portal.teleport(player, portal, null);
-    }
 
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
@@ -129,79 +99,7 @@ public class StarGatePlayerListener implements Listener {
             return;
         }
 
-        int cost = Stargate.getUseCost(player, portal, destination);
-        if (cost > 0) {
-            String target = portal.getGate().getToOwner() ? portal.getOwner() : null;
-            if (!Stargate.chargePlayer(player, target, cost)) {
-                // Insufficient Funds
-                Stargate.sendMessage(player, "Insufficient Funds");
-                portal.close(false);
-                return;
-            }
-            String deductMsg = Stargate.getString("ecoDeduct");
-            deductMsg = Stargate.replaceVars(deductMsg, new String[]{"%cost%", "%portal%"}, new String[]{EconomyHandler.format(cost), portal.getName()});
-            sendMessage(player, deductMsg, false);
-            if (target != null) {
-                Player p = server.getPlayer(target);
-                if (p != null) {
-                    String obtainedMsg = Stargate.getString("ecoObtain");
-                    obtainedMsg = Stargate.replaceVars(obtainedMsg, new String[]{"%cost%", "%portal%"}, new String[]{EconomyHandler.format(cost), portal.getName()});
-                    Stargate.sendMessage(p, obtainedMsg, false);
-                }
-            }
-        }
-
         Stargate.sendMessage(player, Stargate.getString("teleportMsg"), false);
-
-        // BungeeCord Support
-        if (portal.isBungee()) {
-            if (!enableBungee) {
-                player.sendMessage(Stargate.getString("bungeeDisabled"));
-                portal.close(false);
-                return;
-            }
-
-            // Teleport the player back to this gate, for sanity's sake
-            portal.teleport(player, portal, event);
-
-            // Send the SGBungee packet first, it will be queued by BC if required
-            try {
-                // Build the message, format is <player>#@#<destination>
-                String msg = event.getPlayer().getName() + "#@#" + portal.getDestinationName();
-                // Build the message data, sent over the SGBungee bungeecord channel
-                ByteArrayOutputStream bao = new ByteArrayOutputStream();
-                DataOutputStream msgData = new DataOutputStream(bao);
-                msgData.writeUTF("Forward");
-                msgData.writeUTF(portal.getNetwork());	// Server
-                msgData.writeUTF("SGBungee");			// Channel
-                msgData.writeShort(msg.length()); 	// Data Length
-                msgData.writeBytes(msg); 			// Data
-                player.sendPluginMessage(stargate, "BungeeCord", bao.toByteArray());
-            } catch (IOException ex) {
-                Stargate.log.severe("[Stargate] Error sending BungeeCord teleport packet");
-                ex.printStackTrace();
-                return;
-            }
-
-            // Connect player to new server
-            try {
-                ByteArrayOutputStream bao = new ByteArrayOutputStream();
-                DataOutputStream msgData = new DataOutputStream(bao);
-                msgData.writeUTF("Connect");
-                msgData.writeUTF(portal.getNetwork());
-
-                player.sendPluginMessage(stargate, "BungeeCord", bao.toByteArray());
-                bao.reset();
-            } catch (IOException ex) {
-                Stargate.log.severe("[Stargate] Error sending BungeeCord connect packet");
-                ex.printStackTrace();
-                return;
-            }
-
-            // Close portal if required (Should never be)
-            portal.close(false);
-            return;
-        }
 
         destination.teleport(player, portal, event);
         portal.close(false);

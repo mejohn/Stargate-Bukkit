@@ -119,11 +119,12 @@ public class Blox {
 		int offsetY = 0;
 		int offsetZ = 0;
 		
-		if (getBlock() instanceof WallSign) {
+		if (getBlock().getBlockData() instanceof WallSign) {
+			Stargate.debug("findParent", "Found wallsign");
 			BlockFace facing = ((WallSign) getBlock().getBlockData()).getFacing().getOppositeFace();
 			offsetX = facing.getModX();
 			offsetZ = facing.getModZ();
-		} else if (getBlock() instanceof Sign) {
+		} else if (getBlock().getBlockData() instanceof Sign) {
 			offsetY = -1;
 		} else {
 			return;

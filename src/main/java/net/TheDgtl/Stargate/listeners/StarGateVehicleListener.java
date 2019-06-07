@@ -44,7 +44,7 @@ public class StarGateVehicleListener implements Listener {
 	        if (passenger instanceof Player) {
 	            Player player = (Player) passenger;
 	            if (!portal.isOpenFor(player)) {
-	                Stargate.sendMessage(player, Stargate.getString("denyMsg"));
+	                Stargate.sendMessage(player, Stargate.getString("You don't have permission to use this gate"));
 	                return;
 	            }
 	
@@ -64,34 +64,13 @@ public class StarGateVehicleListener implements Listener {
 	            }
 	
 	            if (!canAccessPortal(player, portal, deny)) {
-	                Stargate.sendMessage(player, Stargate.getString("denyMsg"));
+	                Stargate.sendMessage(player, Stargate.getString("You don't have permission to use this gate"));
 	                portal.close(false);
 	                return;
 	            }
+
 	
-	            //int cost = 0;
-	            /*if (cost > 0) {
-	                String target = portal.getGate().getToOwner() ? portal.getOwner() : null;
-	                if (!Stargate.chargePlayer(player, target, cost)) {
-	                    // Insufficient Funds
-	                    Stargate.sendMessage(player, Stargate.getString("inFunds"));
-	                    portal.close(false);
-	                    return;
-	                }
-	                String deductMsg = Stargate.getString("ecoDeduct");
-	                deductMsg = Stargate.replaceVars(deductMsg, new String[]{"%cost%", "%portal%"}, new String[]{EconomyHandler.format(cost), portal.getName()});
-	                sendMessage(player, deductMsg, false);
-	                if (target != null) {
-	                    Player p = server.getPlayer(target);
-	                    if (p != null) {
-	                        String obtainedMsg = Stargate.getString("ecoObtain");
-	                        obtainedMsg = Stargate.replaceVars(obtainedMsg, new String[]{"%cost%", "%portal%"}, new String[]{EconomyHandler.format(cost), portal.getName()});
-	                        Stargate.sendMessage(p, obtainedMsg, false);
-	                    }
-	                }
-	            }*/
-	
-	            Stargate.sendMessage(player, Stargate.getString("teleportMsg"), false);
+	            Stargate.sendMessage(player, "Teleported from " + portal.getName() + " to " + portal.getDestinationName(), false);
 	            dest.teleport(vehicle);
 	            portal.close(false);
 	        } else {

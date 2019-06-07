@@ -158,7 +158,6 @@ public class Stargate extends JavaPlugin {
 		handleVehicles = newConfig.getBoolean("handleVehicles");
 		sortLists = newConfig.getBoolean("sortLists");
 		protectEntrance = newConfig.getBoolean("protectEntrance");
-		enableBungee = newConfig.getBoolean("enableBungee");
 		verifyPortals = newConfig.getBoolean("verifyPortals");
 		// Sign color
 		String sc = newConfig.getString("signColor");
@@ -246,6 +245,9 @@ public class Stargate extends JavaPlugin {
 	}
 
 	public static String getString(String name) {
+		if (name.contentEquals("prefix")) {
+			return "Stargate: ";
+		}
 		return name;
 	}
 
@@ -263,7 +265,7 @@ public class Stargate extends JavaPlugin {
 
 		// Invalid destination
 		if ((destination == null) || (destination == portal)) {
-			Stargate.sendMessage(player, Stargate.getString("invalidMsg"));
+			Stargate.sendMessage(player, "Invalid destination");
 			return;
 		}
 
@@ -278,13 +280,13 @@ public class Stargate extends JavaPlugin {
 
 		// Gate that someone else is using -- Deny access
 		if ((!portal.isFixed()) && portal.isActive() &&  (portal.getActivePlayer() != player)) {
-			Stargate.sendMessage(player, Stargate.getString("denyMsg"));
+			Stargate.sendMessage(player, "Someone else is using that gate right now");
 			return;
 		}
 
 		// Destination blocked
 		if ((destination.isOpen()) && (!destination.isAlwaysOn())) {
-			Stargate.sendMessage(player, Stargate.getString("blockMsg"));
+			Stargate.sendMessage(player, "Destination is blocked");
 			return;
 		}
 
@@ -393,66 +395,11 @@ public class Stargate extends JavaPlugin {
 	public static boolean canDestroy(Player player, Portal portal) {
 		return true;
 	}
-
-	/*
-	 * Charge player for {action} if required, true on success, false if can't afford
-	 */
-	/*public static boolean chargePlayer(Player player, String target, int cost) {
-		// If cost is 0
-		if (cost == 0) return true;
-		// Economy is disabled
-		if (!EconomyHandler.useEconomy()) return true;
-		// Charge player
-		return EconomyHandler.chargePlayer(player.getName(), target, cost);
-	}*
-
-	/*
-	 * Determine the cost of a gate
-	 */
-	/*public static int getUseCost(Player player, Portal src, Portal dest) {
-		// Not using Economy
-		if (!EconomyHandler.useEconomy()) return 0;
-		// Portal is free
-		if (src.isFree()) return 0;
-		// Not charging for free destinations
-		if (dest != null && !EconomyHandler.chargeFreeDestination && dest.isFree()) return 0;
-		// Cost is 0 if the player owns this gate and funds go to the owner
-		if (src.getGate().getToOwner() && src.getOwner().equalsIgnoreCase(player.getName())) return 0;
-		// Player gets free gate use
-		if (hasPerm(player, "stargate.free") || hasPerm(player, "stargate.free.use")) return 0;
-
-		return src.getGate().getUseCost();
-	}*/
-
-	/*
-	 * Determine the cost to create the gate
-	 */
+	
 	public static int getCreateCost(Player player, Gate gate) {
 		return 0;
-	}/*
-		// Not using Economy
-		if (!EconomyHandler.useEconomy()) return 0;
-		// Player gets free gate destruction
-		if (hasPerm(player, "stargate.free") || hasPerm(player, "stargate.free.create")) return 0;
-
-		return gate.getCreateCost();
-	}*/
-
-	/*
-	 * Determine the cost to destroy the gate
-	 */
-	/*public static int getDestroyCost(Player player, Gate gate) {
-		// Not using Economy
-		if (!EconomyHandler.useEconomy()) return 0;
-		// Player gets free gate destruction
-		if (hasPerm(player, "stargate.free") || hasPerm(player, "stargate.free.destroy")) return 0;
-
-		return gate.getDestroyCost();
-	}*/
-
-	/*
-	 * Check if a plugin is loaded/enabled already. Returns the plugin if so, null otherwise
-	 */
+	}
+	
 	private Plugin checkPlugin(String p) {
 		Plugin plugin = pm.getPlugin(p);
 		return checkPlugin(plugin);
@@ -484,8 +431,6 @@ public class Stargate extends JavaPlugin {
 			if (args.length != 1) return false;
 			if (args[0].equalsIgnoreCase("about")) {
 				sender.sendMessage("Stargate Plugin created by Drakia");
-				/*if (!lang.getString("author").isEmpty())
-					sender.sendMessage("Language created by " + lang.getString("author"));*/
 				return true;
 			}
 			if (sender instanceof Player) {
@@ -510,27 +455,9 @@ public class Stargate extends JavaPlugin {
 				Portal.clearGates();
 				Gate.clearGates();
 
-				// Store the old Bungee enabled value
-				boolean oldEnableBungee = enableBungee;
-				// Reload data
 				loadConfig();
 				reloadGates();
-				//lang.setLang(langName);
-				//lang.reload();
-
-				// Load Economy support if enabled/clear if disabled
-				/*if (EconomyHandler.economyEnabled && EconomyHandler.economy == null) {
-					if (EconomyHandler.setupEconomy(pm)) {
-						if (EconomyHandler.economy != null)
-							log.info("[Stargate] Vault v" + EconomyHandler.vault.getDescription().getVersion() + " found");
-			        }
-				}
-				if (!EconomyHandler.economyEnabled) {
-					EconomyHandler.vault = null;
-					EconomyHandler.economy = null;
-				}*/
-
-
+				
 				sendMessage(sender, "Stargate reloaded");
 				return true;
 			}
@@ -542,4 +469,18 @@ public class Stargate extends JavaPlugin {
     public static Stargate getInstance() {
         return instance;
     }
+
+	public static String getSignString(String operator) {
+		// TODO Auto-generated method stub
+		if(operator.contentEquals("signRightClick")) {
+			return "Right click";
+		} else if(operator.contentEquals("signToUse")) {
+			return "to use gate";
+		} else if(operator.contentEquals("signRandom")) {
+			return "Random";
+		} else if(operator.contentEquals("signDisconnected")) {
+			return "Disconnected";
+		}
+		return operator;
+	}
 }

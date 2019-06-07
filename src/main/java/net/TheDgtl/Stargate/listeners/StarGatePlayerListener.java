@@ -9,7 +9,6 @@ import net.TheDgtl.Stargate.Portal;
 import net.TheDgtl.Stargate.Stargate;
 import static net.TheDgtl.Stargate.Stargate.canAccessNetwork;
 import static net.TheDgtl.Stargate.Stargate.canAccessPortal;
-import static net.TheDgtl.Stargate.Stargate.canAccessServer;
 import static net.TheDgtl.Stargate.Stargate.canAccessWorld;
 import static net.TheDgtl.Stargate.Stargate.openPortal;
 import org.bukkit.GameMode;
@@ -64,7 +63,7 @@ public class StarGatePlayerListener implements Listener {
 
         // Not open for this player
         if (!portal.isOpenFor(player)) {
-            Stargate.sendMessage(player, Stargate.getString("denyMsg"));
+            Stargate.sendMessage(player, Stargate.getString("You don't have permission to use this gate"));
             portal.teleport(player, portal, event);
             return;
         }
@@ -75,31 +74,25 @@ public class StarGatePlayerListener implements Listener {
         }
 
         boolean deny = false;
-        // Check if player has access to this server for Bungee gates
-        if (portal.isBungee()) {
-            if (!canAccessServer(player, portal.getNetwork())) {
-                deny = true;
-            }
-        } else {
-            // Check if player has access to this network
-            if (!canAccessNetwork(player, portal.getNetwork())) {
-                deny = true;
-            }
 
-            // Check if player has access to destination world
-            if (!canAccessWorld(player, destination.getWorld().getName())) {
-                deny = true;
-            }
+        // Check if player has access to this network
+        if (!canAccessNetwork(player, portal.getNetwork())) {
+            deny = true;
+        }
+
+        // Check if player has access to destination world
+        if (!canAccessWorld(player, destination.getWorld().getName())) {
+            deny = true;
         }
 
         if (!canAccessPortal(player, portal, deny)) {
-            Stargate.sendMessage(player, Stargate.getString("denyMsg"));
+            Stargate.sendMessage(player, Stargate.getString("You don't have permission to use this gate"));
             portal.teleport(player, portal, event);
             portal.close(false);
             return;
         }
 
-        Stargate.sendMessage(player, Stargate.getString("teleportMsg"), false);
+        Stargate.sendMessage(player, "Teleported from " + portal.getName() + " to " + portal.getDestinationName(), false);
 
         destination.teleport(player, portal, event);
         portal.close(false);
@@ -127,7 +120,7 @@ public class StarGatePlayerListener implements Listener {
                 }
 
                 if (!Stargate.canAccessPortal(player, portal, deny)) {
-                    Stargate.sendMessage(player, Stargate.getString("denyMsg"));
+                    Stargate.sendMessage(player, Stargate.getString("You don't have permission to use this gate"));
                     return;
                 }
 
@@ -154,7 +147,7 @@ public class StarGatePlayerListener implements Listener {
                 }
 
                 if (!Stargate.canAccessPortal(player, portal, deny)) {
-                    Stargate.sendMessage(player, Stargate.getString("denyMsg"));
+                    Stargate.sendMessage(player, Stargate.getString("You don't have permission to use this gate"));
                     return;
                 }
 
@@ -187,7 +180,7 @@ public class StarGatePlayerListener implements Listener {
                 }
 
                 if (!Stargate.canAccessPortal(player, portal, deny)) {
-                    Stargate.sendMessage(player, Stargate.getString("denyMsg"));
+                    Stargate.sendMessage(player, "You don't have permission to use this gate");
                     return;
                 }
 

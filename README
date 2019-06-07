@@ -1,66 +1,11 @@
-=============
-   Updates
-=============
-Please visit http://forum.thedgtl.net for all updates and support!
+# Current working spigot version: 1.14.2
 
 =============
  Description
 =============
 This is a port of the Stargate plugin from hMod by Dinnerbone.
 Create gates that allow for instant-teleportation between large distances. Gates can be always-open, or triggered, they can be hidden, or accessible to everybody, they can share a network, or they can be split into clusters.
-This port will import your existing locations.dat file from the hMod Stargate plugin!
-Economy support added back in, only costs are create, destroy and use.
 
-=============
- Permissions
-=============
-stargate.use -- Allow use of all gates linking to any world in any network (Override ALL network/world permissions. Set to false to use network/world specific permissions)
-  stargate.world -- Allow use of gates linking to any world
-    stargate.world.{world} -- Allow use of gates with a destination in {world}. Set to false to disallow use.
-  stargate.network -- Allow use of gates on all networks
-    stargate.network.{network} -- Allow use of all gates in {network}. Set to false to disallow use.
-
-stargate.option -- Allow use of all options
-  stargate.option.hidden -- Allow use of 'H'idden
-  stargate.option.alwayson -- Allow use of 'A'lways-On
-  stargate.option.private -- Allow use of 'P'rivate
-  stargate.option.free -- Allow use of 'F'ree
-  stargate.option.backwards -- Allow use of 'B'ackwards
-  stargate.option.show -- Allow use of 'S'how
-  stargate.option.nonetwork -- Allow use of 'N'oNetwork
-  stargate.option.random -- Allow use of 'Random' gates
-  
-stargate.create -- Allow creating gates on any network (Override all create permissions)
-  stargate.create.personal -- Allow creating gates on network {playername}
-  stargate.create.network -- Allow creating gates on any network
-    stargate.create.network.{networkname} -- Allow creating gates on network {networkname}. Set to false to disallow creation on {networkname}
-  stargate.create.gate -- Allow creation of any gate layout
-    stargate.create.gate.{gatefile} -- Allow creation of only {gatefile} gates
-
-stargate.destroy -- Allow destruction gates on any network (Orderride all destroy permissions)
-  stargate.destroy.personal -- Allow destruction of gates owned by user only
-  stargate.destroy.network -- Allow destruction of gates on any network
-    stargate.destroy.network.{networkname} -- Allow destruction of gates on network {networkname}. Set to false to disallow destruction of {networkname}
-
-stargate.free -- Allow free use/creation/destruction of gates
-  stargate.free.use -- Allow free use of Stargates
-  stargate.free.create -- Allow free creation of Stargates
-  stargate.free.destroy -- Allow free destruction of Stargates
-  
-stargate.admin -- Allow all admin features (Hidden/Private only so far)
-  stargate.admin.private -- Allow use of Private gates not owned by user
-  stargate.admin.hidden -- Allow access to Hidden gates not ownerd by user
-  stargate.admin.reload -- Allow use of /sg reload
-
-=============
-Default Permissions
-=============
-stargate.use -- Everyone
-stargate.create -- Op
-stargate.destroy -- Op
-stargate.option -- Op
-stargate.free -- Op
-stargate.admin -- Op
 
 =============
 Instructions
@@ -167,40 +112,6 @@ verifyPortals: Whether or not all the non-sign blocks are checked to match the g
 debug - Whether to show massive debug output
 permdebug - Whether to show massive permission debug output
 
-=======================
- Message Customization
-=======================
-As of 0.6.5 it is possible to customize all of the messages Stargate displays, including the [Stargate] prefix. You can find the strings in plugins/Stargate/lang/en.txt. 
-If a string is removed, or left blank, it will not be shown when the user does the action associated with it.
-There are three special cases when it comes to messages, these are:
-ecoDeduct=Spent %cost%
-ecoRefund=Refunded %cost%
-ecoObtain=Obtained %cost% from Stargate %portal%
-
-As you can see, these three strings have %cost% and %portal% variables in them. These variables are fairly self-explanatory.
-
-The full list of strings is as follows:
-prefix=[Stargate] 
-teleportMsg=Teleported
-destroyMsg=Gate Destroyed
-invalidMsg=Invalid Destination
-blockMsg=Destination Blocked
-denyMsg=Access Denied
-destEmpty=Destination List Empty
-
-ecoDeduct=Deducted %cost%
-ecoRefund=Redunded %cost%
-ecoObtain=Obtained %cost% from Stargate %portal%
-ecoInFunds=Insufficient Funds
-
-createMsg=Gate Created
-createNetDeny=You do not have access to that network
-createPersonal=Creating gate on personal network
-createNameLength=Name too short or too long.
-createExists=A gate by that name already exists
-createFull=This network is full
-createWorldDeny=You do not have access to that world
-createConflict=Gate conflicts with existing gate
 
 =============
  Known Bugs
@@ -210,6 +121,7 @@ Stargates are stored under player names, not UUIDs. This will be changed in the 
 =============
   Changes
 =============
+[Version 0.9.0.0] mejohn fork - Upgraded to 1.14, removed Vault dependency, removed economy support, removed permissions. Bare bones teleportation.
 [Version 0.8.0.0] PseudoKnight fork
  - Update for 1.13 compatibility. This changes gate layouts to use new material names instead of numeric ids. You need to update your gate layout configs.
  - Adds "verifyPortals" config option, which sets whether a stargate layout is verified when it is loaded.

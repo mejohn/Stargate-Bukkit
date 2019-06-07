@@ -40,7 +40,7 @@ public class StargateActivateEvent extends StargateEvent {
 		return handlers;
 	}
 	public StargateActivateEvent(Portal portal, Player player, ArrayList<String> destinations, String destination) {
-		super("StargatActivateEvent", portal);
+		super("StargateActivateEvent", portal);
 		
 		this.player = player;
 		this.destinations = destinations;

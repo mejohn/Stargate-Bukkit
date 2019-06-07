@@ -134,8 +134,6 @@ public class Blox {
 	
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		//builder.append(world.getName());
-		//builder.append(',');
 		builder.append(x);
 		builder.append(',');
 		builder.append(y);

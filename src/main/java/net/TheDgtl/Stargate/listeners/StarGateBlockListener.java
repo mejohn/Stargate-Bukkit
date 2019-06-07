@@ -38,19 +38,17 @@ public class StarGateBlockListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         if (!(block.getBlockData() instanceof WallSign)) {
-        	Stargate.sendMessage(player, "SGBlockListener: Block is not Sign " + block.getBlockData().getAsString());
             return;
         }
 
         final Portal portal = Portal.createPortal(event, player);
-        // Not creating a gate, just placing a sign
         
+        // Not creating a gate, just placing a sign
         if (portal == null) {
-        	Stargate.sendMessage(player, "SGBlockListener: Portal is null");
             return;
         }
 
-        Stargate.sendMessage(player, Stargate.getString("createMsg"), false);
+        Stargate.sendMessage(player, "New gate created", false);
         Stargate.debug("onSignChange", "Initialized stargate: " + portal.getName());
         Stargate.server.getScheduler().scheduleSyncDelayedTask(stargate, new Runnable() {
             public void run() {
@@ -101,27 +99,8 @@ public class StarGateBlockListener implements Listener {
 
         cost = dEvent.getCost();
 
-        /*if (cost != 0) {
-            if (!Stargate.chargePlayer(player, null, cost)) {
-                Stargate.debug("onBlockBreak", "Insufficient Funds");
-                Stargate.sendMessage(player, Stargate.getString("inFunds"));
-                event.setCancelled(true);
-                return;
-            }
-
-            if (cost > 0) {
-                String deductMsg = Stargate.getString("ecoDeduct");
-                deductMsg = Stargate.replaceVars(deductMsg, new String[]{"%cost%", "%portal%"}, new String[]{EconomyHandler.format(cost), portal.getName()});
-                sendMessage(player, deductMsg, false);
-            } else if (cost < 0) {
-                String refundMsg = Stargate.getString("ecoRefund");
-                refundMsg = Stargate.replaceVars(refundMsg, new String[]{"%cost%", "%portal%"}, new String[]{EconomyHandler.format(-cost), portal.getName()});
-                sendMessage(player, refundMsg, false);
-            }
-        }*/
-
         portal.unregister(true);
-        Stargate.sendMessage(player, Stargate.getString("destroyMsg"), false);
+        Stargate.sendMessage(player, "Gate destroyed", false);
     }
 
     @EventHandler
